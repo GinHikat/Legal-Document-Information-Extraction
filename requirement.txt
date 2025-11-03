@@ -1,0 +1,11 @@
+pandas
+numpy
+pytorch_crf
+vncorenlp
+underthesea
+torch
+torchvision
+torchaudio
+tqdm
+transformers
+sentencepiece
