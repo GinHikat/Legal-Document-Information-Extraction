@@ -8,3 +8,7 @@ The training dataset for the RE model is taken from a Previous work about Joint 
 
 This is a pre-requisite step for a larger project involving the construction of Vietnamese Legal Document Knowledge Graph for optimizing the Context Retrieval
 
+Due to the big data file, we cannot directly upload the folder on Github even after zipping, instead we uploaded it on a Google Drive, the data can be downloaded here: 
+
+https://drive.google.com/file/d/1GKs4zLSR-8tIqdyE2ISvGY3QKUdAnrjX/view?usp=sharing
+
