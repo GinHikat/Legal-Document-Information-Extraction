@@ -21,7 +21,23 @@ git clone https://github.com/GinHikat/Legal-Document-Information-Extraction.git
 Unzip the file and put the artifact folder inside the demo folder
 
 ``` 
- demo/ ├── artifact/ │ ├── phobert-base/ │ ├── test_document/ │ ├── VnCoreNLP/ │ ├── id2relation.json │ ├── label2idx.json │ ├── model_bilstm_crf.pt │ ├── re_8_train_phobert_1_3.pth │ ├── RE_training_final.csv │ ├── token2idx.json├── demo.py ├── final_ner.py ├── final_re.py └── test_pipeline.ipynb NER/ RE/ 
+ demo/ ├──
+artifact/ │ ├──
+phobert-base/ │ ├──
+test_document/ │ ├──
+VnCoreNLP/ │ ├──
+id2relation.json │ ├──
+label2idx.json │ ├──
+model_bilstm_crf.pt │ ├──
+re_8_train_phobert_1_3.pth │ ├──
+RE_training_final.csv │ ├──
+token2idx.json ├──
+demo.py ├──
+final_ner.py ├──
+final_re.py └──
+test_pipeline.ipynb
+NER/
+RE/ 
 ```
 
 3. Navigate to the demo folder of the repository
@@ -41,4 +57,5 @@ pip install -r requirement.txt
 python demo.py
 
 Input file path here: artifact/test_document/luat_thue_gtgt_2024.pdf
+
 ```
