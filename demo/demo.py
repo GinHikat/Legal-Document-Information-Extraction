@@ -14,8 +14,12 @@ from PyPDF2 import PdfReader
 with open('artifact/id2relation.json', 'r') as f:
     id2relation = json.load(f)
     
-# ner_annotator = VnCoreNLP("artifact/VnCoreNLP/VnCoreNLP-1.1.1.jar", annotators="wseg,pos,ner", max_heap_size='-Xmx2g') 
-ner_annotator = None
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Build a path relative to that
+jar_path = os.path.join(BASE_DIR, "artifact", "VnCoreNLP", "VnCoreNLP-1.1.1.jar")
+
+ner_annotator = VnCoreNLP(jar_path, annotators="wseg,pos,ner", max_heap_size='-Xmx2g')
 
 ner = NER(
     model_path="artifact/model_bilstm_crf.pt",
@@ -109,7 +113,7 @@ if __name__ == "__main__":
         df_meta = ner.extract_document_metadata(content)
         df_relation = relation_extraction(content)
         
-        print("\nSample File Content")
+        print("/nSample File Content")
         print(sent_tokenize(content)[0])  
         
         print('=' * 50)
