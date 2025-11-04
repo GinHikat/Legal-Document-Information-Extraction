@@ -16,7 +16,8 @@ git clone https://github.com/GinHikat/Legal-Document-Information-Extraction.git
 ```
 
 2. Follow the link below to download the artifact folder, containing index-mapping dictionaries, model state_dict, PhoBERT-base snapshot and VnCoreNLP local system.
-[https://drive.google.com/file/d/1GKs4zLSR-8tIqdyE2ISvGY3QKUdAnrjX/view?usp=sharing](https://drive.google.com/file/d/1OK5m_rMpbJdzAO5zzAK2w4vETLaeyx4W/view?usp=sharing)
+   
+https://drive.google.com/file/d/11bMiRga5B9vc0o1B8rnJxzPml8FxgVvj/view?usp=sharing
 
 Unzip the file and put the artifact folder inside the demo folder
 
@@ -60,4 +61,5 @@ python demo.py
 Input file path here: artifact/test_document/luat_thue_gtgt_2024.pdf
 
 ```
+
 
