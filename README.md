@@ -12,7 +12,6 @@ To run a Demo of this Project result, follow the steps below:
 1. Clone the Git repository
 
 ``` 
-
 git clone https://github.com/GinHikat/Legal-Document-Information-Extraction.git
 ```
 
@@ -22,21 +21,18 @@ git clone https://github.com/GinHikat/Legal-Document-Information-Extraction.git
 Unzip the file and put the artifact folder inside the demo folder
 
 ``` 
-Legal-Document-Information-Extraction -> demo -> artifact -> data files
-
+ demo/ ├── artifact/ │ ├── phobert-base/ │ ├── test_document/ │ ├── VnCoreNLP/ │ ├── id2relation.json │ ├── label2idx.json │ ├── model_bilstm_crf.pt │ ├── re_8_train_phobert_1_3.pth │ ├── RE_training_final.csv │ ├── token2idx.json├── demo.py ├── final_ner.py ├── final_re.py └── test_pipeline.ipynb NER/ RE/ 
 ```
 
 3. Navigate to the demo folder of the repository
 
 ``` 
-
 cd Legal-Document-Information-Extraction/demo
 ```
 
 4. Ensure the environment has Java > 1.8.0 for VnCoreNLP and run to download other dependencies
 ``` 
 pip install -r requirement.txt
-
 ```
 
 5. Run the demo.py file and input the path of a sample document for the prediction, 4 sample documents of different document types have been included in the path demo/artifact/test_document. 
@@ -45,5 +41,4 @@ pip install -r requirement.txt
 python demo.py
 
 Input file path here: artifact/test_document/luat_thue_gtgt_2024.pdf
-
 ```
