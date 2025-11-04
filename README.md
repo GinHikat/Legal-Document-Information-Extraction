@@ -42,15 +42,15 @@ NER/
 RE/
 ```
 
-3. Navigate to the demo folder of the repository
+3. Ensure the environment has Java > 1.8.0 for VnCoreNLP and run to download other dependencies
+``` 
+pip install -r requirement.txt
+```
+
+4. Navigate to the demo folder of the repository
 
 ``` 
 cd Legal-Document-Information-Extraction/demo
-```
-
-4. Ensure the environment has Java > 1.8.0 for VnCoreNLP and run to download other dependencies
-``` 
-pip install -r requirement.txt
 ```
 
 5. Run the demo.py file and input the path of a sample document for the prediction, 4 sample documents of different document types have been included in the path demo/artifact/test_document. 
@@ -61,5 +61,6 @@ python demo.py
 Input file path here: artifact/test_document/luat_thue_gtgt_2024.pdf
 
 ```
+
 
 
