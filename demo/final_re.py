@@ -57,16 +57,7 @@ class PhoBertEmbedding(nn.Module):
         if freeze:
             for p in self.model.parameters():
                 p.requires_grad = False
-
-    def encode(self, texts):
-        toks = self.tokenizer(texts, return_tensors="pt", padding=True, truncation=True, max_length = self.max_length)
-        input_ids = toks["input_ids"].to(self.device)
-        attention_mask = toks["attention_mask"].to(self.device)
-        outputs = self.model(input_ids=input_ids, attention_mask=attention_mask, return_dict=True)
-        # last_hidden_state: (batch, seq_len, hidden)
-        return outputs.last_hidden_state, attention_mask, toks
     
-    #only different by name but for Module usage
     def forward(self, texts):
         toks = self.tokenizer(texts, return_tensors="pt", padding=True, truncation=True, max_length = self.max_length)
         input_ids = toks["input_ids"].to(self.device)
@@ -140,7 +131,6 @@ class SinusoidalPositionalEncoding(nn.Module):
         position = torch.arange(max_len).unsqueeze(1) #(max_len, 1)
         div_term = torch.exp(torch.arange(0, dim, 2) * (-math.log(10000.0) / dim))
 
-        #sine/cosine positional encodings
         pe = torch.zeros(max_len, dim)
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term)
@@ -327,8 +317,6 @@ class TransformerEncoder(nn.Module):
         seq_len = x.size(1)
         device = x.device
 
-        # Get positional representation depending on mode
-
         if self.use_rel_pos:
             pos_rep = self.pos_module(seq_len, device=device)  # (n_heads, L, L)
             pos_kwargs = {"pos_bias": pos_rep, "sinusoidal_pe": None}
@@ -337,7 +325,7 @@ class TransformerEncoder(nn.Module):
             pos_kwargs = {"pos_bias": None, "sinusoidal_pe": pos_rep}
 
 
-        # Compute POS-tag bias if applicable
+        # Compute POS-tag bias if available
         postag_bias = None
         if self.postag_bias is not None and postag_ids is not None:
             postag_bias = self.postag_bias(postag_ids)  # (B, n_heads, L, L)
@@ -349,7 +337,7 @@ class TransformerEncoder(nn.Module):
             context=None,
             postag_bias=postag_bias,
             lex_mask=lex_mask,
-            **pos_kwargs   # dynamically pass correct positional arg
+            **pos_kwargs
         )
 
         #  Feed Forward
@@ -370,7 +358,6 @@ class StackedEncoder(nn.Module):
                  num_layers=6):  # number of encoder blocks
         super().__init__()
 
-        # Stack of independent TransformerEncoder blocks
         self.layers = nn.ModuleList([
             TransformerEncoder(
                 dim=dim,
@@ -385,7 +372,7 @@ class StackedEncoder(nn.Module):
             for _ in range(num_layers)
         ])
 
-        # Final normalization — important if using pre-LN blocks (like your TransformerEncoder)
+        # Final normalization — important if using pre-LN block
         self.final_norm = nn.LayerNorm(dim) if pre_ln else nn.Identity()
 
     def forward(self, x, postag_ids=None, lex_mask=None, output_hidden_states=False):
@@ -397,7 +384,7 @@ class StackedEncoder(nn.Module):
             if output_hidden_states:
                 hidden_states.append(x)
 
-        # Apply normalization after all layers (for pre-LN Transformer)
+        # normalization after all layers (for pre-LN Transformer)
         x = self.final_norm(x)
 
         if output_hidden_states:
@@ -513,7 +500,7 @@ class DecoderBody(nn.Module):
         if decoder_state.dim() == 2:
             decoder_state = decoder_state.unsqueeze(-1).repeat(1, 1, encoder_output.size(-1))
 
-        # ---- Cross-Attention ----
+        # Cross-Attention
         cross_out, _ = self.cross_attn(
             query=decoder_state,
             context=encoder_output,
@@ -522,7 +509,7 @@ class DecoderBody(nn.Module):
         x = self.norm(cross_out + decoder_state)
         x = self.dropout(x)
 
-        # ---- BiLSTM + FFN ----
+        # BiLSTM + FFN
         x = self.bilstm(x)
         x = self.ffn(x)
 
@@ -552,7 +539,6 @@ class StackedDecoder(nn.Module):
             for _ in range(num_layers)
         ])
 
-        # Final normalization after stacked layers
         self.final_norm = nn.LayerNorm(hidden_dim)
 
         # Shared decoder head
@@ -573,7 +559,6 @@ class StackedDecoder(nn.Module):
         for layer in self.layers:
             x = layer(x, encoder_output, mask)
 
-        # Final normalization
         x = self.final_norm(x)
 
         # Apply the shared decoder head
@@ -603,7 +588,6 @@ class Transformer(nn.Module):
         # combined_output: (B, L, D)
         # attn_mask:      (B, L)
 
-        #multi-block encoder
         encoded_output = self.encoder(
             combined_output,
             postag_ids=postag_ids,
@@ -617,7 +601,7 @@ class Transformer(nn.Module):
         )
 
 
-        # if StackedDecoder returns logits directly (root, rel, start, end), unpack them here:
+        # if StackedDecoder returns logits directly (root, rel, start, end), unpack 
         if isinstance(decoder_output, tuple) and len(decoder_output) == 4:
             root_logits, relation_logits, start_logits, end_logits = decoder_output
         else:
@@ -719,7 +703,6 @@ class RE:
                                 return_tensors="pt",
                                 max_length = 256)
 
-        # Run model forward pass
         with torch.no_grad():
             outputs = model([text], postag_ids = None)   
             
@@ -748,7 +731,7 @@ class RE:
         # Extract predicted span (include end_idx)
         predicted_span = input_tokens[start_idx:end_idx + 3]
 
-        # Detokenize
+        # Detokenize for final readable format
         predicted_span_clean = self.detokenize_phobert_tokens(predicted_span)
                         
         return pd.DataFrame({

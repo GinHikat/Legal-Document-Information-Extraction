@@ -90,11 +90,10 @@ class NER:
             pad_idx=self.token2idx["<PAD>"]
         ).to(self.device)
 
-        # Load trained weights
         self.model.load_state_dict(torch.load(model_path, map_location=self.device))
         self.model.eval()
 
-    #  Tokenization & Prediction 
+        # tokenize and prediction
     def _tokenize(self, text):
         return re.findall(r"\w+|[^\w\s]", text.lower(), re.UNICODE)
 
@@ -113,7 +112,7 @@ class NER:
         labels = [self.idx2label[p] for p in preds]
         return tokens, labels
 
-    #  Utility / Cleaning Helpers 
+    #  cleaning functions
     @staticmethod
     def merge_entities(tokens, labels):
         entities, current_tokens, current_type = [], [], None
@@ -239,7 +238,6 @@ class NER:
             "document_type": None,
         }
 
-        # === Extract from first sentence ===
         seen_loc = 0
         for text_, etype in entities:
             if etype == "DEP" and metadata["issuer_department"] is None:
@@ -264,7 +262,7 @@ class NER:
                     if expanded_docid else docid_candidate
                 )
 
-        # === Auto-fill missing year in issue_date ===
+        # Auto-fill missing year in issue_date using Document_ID
         if metadata.get("issue_date") and metadata.get("document_id"):
             date_str = metadata["issue_date"]
             if date_str.count("/") == 1:
@@ -278,23 +276,19 @@ class NER:
         if not metadata["location"]:
             metadata["location"] = "Hà Nội"
 
-        # === Title & Document Type Extraction ===
         title_keywords = ["luật", "nghị quyết", "nghị định", "thông tư",
                         "quyết định", "chỉ thị", "hướng dẫn"]
 
-        # Mark all title_keywords as B-TIT
+        # Check and set for Title B-TIT
         for i, tok in enumerate(tokens):
             if tok.lower() in [kw.split()[0] for kw in title_keywords]:
                 labels[i] = "B-TIT"
 
-        # Find first B-TIT token
         first_b_tit_idx = next((i for i, lbl in enumerate(labels) if lbl == "B-TIT"), None)
 
         if first_b_tit_idx is not None:
-            # Get the token that starts the title
             title_start_token = tokens[first_b_tit_idx]
 
-            # Find the start of this token in the raw text
             start_idx = first_sentence.lower().find(title_start_token.lower())
             if start_idx == -1:
                 start_idx = 0 
@@ -305,13 +299,13 @@ class NER:
             expanded_title = first_sentence[start_idx:end_idx].replace("\n", " ").strip()
             metadata["title"] = expanded_title
 
-            # Determine document_type
+            # Determine document_type to start with Title
             for kw in title_keywords:
                 if expanded_title.lower().startswith(kw):
                     metadata["document_type"] = kw.capitalize()
                     break
-
-        # Handle second "Luật" occurrence
+        
+        #Skip the first instance of Luat so, defining doc_id
         if (metadata.get("document_type") or "").lower() == "luật":
             luat_indices = [i for i, t in enumerate(tokens) if t.lower() == "luật"]
             if len(luat_indices) >= 2:
@@ -333,7 +327,7 @@ class NER:
             if not title_lower.startswith(doc_type_lower):
                 metadata["title"] = f"{metadata['document_type']} {metadata['title']}"
 
-        # === Extract issuer using VnCoreNLP ===
+        # use VnCoreNLP for trustworthy PER labelling
         try:
             annotated = self.annotator.annotate(last_sentence)
             persons, current_name = [], []
@@ -365,7 +359,6 @@ class NER:
         except Exception as e:
             metadata["issuer"] = "UNKNOWN"
 
-        # === Final formatting ===
         df = pd.DataFrame([metadata])
         for col in metadata.keys():
             df[col] = df[col].fillna("")

@@ -16,7 +16,6 @@ with open('artifact/id2relation.json', 'r') as f:
     
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Build a path relative to that
 jar_path = os.path.join(BASE_DIR, "artifact", "VnCoreNLP", "VnCoreNLP-1.1.1.jar")
 
 ner_annotator = VnCoreNLP(jar_path, annotators="wseg,pos,ner", max_heap_size='-Xmx2g')
@@ -37,15 +36,14 @@ def final_relation_check(text, df):
     re_result = re_model.predict(text)
     ner_result = ner.extract_document_metadata(text)
 
-    # Safety checks
+    # Safety check for Span
     if re_result is None or 'Span' not in re_result.columns or re_result['Span'].isna().all():
         return df
 
-    # Get a clean span string
     span = str(re_result['Span'].iloc[0]).lower()
     span_tokens = re.findall(r'\w+', span)
 
-    # Rule check
+    # Rule check if Span has check_mask then span is valid, else it's not relation
     if any(token in check_mask for token in span_tokens):
         meta = ner_result[['issue_date', 'title', 'document_id']].iloc[:1].reset_index(drop=True)
         rel = re_result.iloc[:1].reset_index(drop=True)
@@ -68,7 +66,6 @@ def extract_sentences(text):
         if line.endswith(';'):
             sent = ' '.join(buffer).strip()
 
-            # Remove header junk before first "Căn cứ"
             idx = sent.find("Căn cứ")
             if idx != -1:
                 sent = sent[idx:].strip()
